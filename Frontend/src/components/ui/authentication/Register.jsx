@@ -1,84 +1,170 @@
-import React, { useState } from 'react'
-import Navbar from '../components_lite/Navbar'
-import { Label } from '../label'
-import { Input } from '../input'
-import { RadioGroup, RadioGroupItem } from '../radio-group'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import Navbar from '../components_lite/Navbar';
+import { Label } from '../label';
+import { Input } from '../input';
+import { RadioGroup } from '../radio-group';
+import { Link, useNavigate } from 'react-router-dom';
+import authService from '../../../services/authService';
+import { useDispatch, useSelector } from 'react-redux';
+import { setLoading } from '../../../redux/authSlice';
+import { Loader2 } from 'lucide-react';
 
 const Register = () => {
+  const [input, setInput] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "Job Seeker",
+    phoneNumber: "",
+  });
 
-  const[input , setInput] = useState({
-  fullname:"",
-  email: "",
-  password:"",
-  role: " ",
-  phoneNumber: "",
-});
+  const [error, setError] = useState("");
+  const { loading } = useSelector(store => store.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-const changeEventHandler = (e) =>{
-  setInput({...input,[e.target.name]: e.target.value});
-}
+  const changeEventHandler = (e) => {
+    setInput({ ...input, [e.target.name]: e.target.value });
+  };
 
-const submitHandler =  async (e)=>{
-  e.preventDefault();
-  console.log(input);
-}
+  const validateForm = () => {
+    if (!input.name || !input.email || !input.password || !input.phoneNumber) {
+      setError("All fields are required");
+      return false;
+    }
+    if (!input.email.match(/^\S+@\S+\.\S+$/)) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    if (input.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return false;
+    }
+    return true;
+  };
 
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setError("");
 
+    if (!validateForm()) return;
+
+    try {
+      dispatch(setLoading(true));
+      const response = await authService.register(input);
+      if (response) {
+        navigate("/login");
+      }
+    } catch (err) {
+      setError(err.toString());
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
   return (
     <div>
-      <Navbar></Navbar>
+      <Navbar />
       <div className='flex items-center justify-center max-w-7xl mx-auto'>
-        <form onSubmit={submitHandler} className='w-1/2 border border-grey-500 rounded-md p-4 my-10'>
-          <h1 className='font-bold text-xl mb-5 text-center text-green-900'>Register</h1>
-          <div className=' my-2'>
-            <Label>Fullname</Label>
-            <Input type='text' value={input.fullname} name='fullname' onChange={changeEventHandler} placeholder='Sam Walker'></Input>
+        <form onSubmit={submitHandler} className='w-1/2 border border-gray-200 rounded-md p-4 my-10 shadow-sm'>
+          <h1 className='font-bold text-xl mb-5 text-center text-green-900'>Create Account</h1>
+
+          {error && <div className="bg-red-50 text-red-600 p-2 rounded-md mb-4 text-sm font-medium text-center border border-red-100">{error}</div>}
+
+          <div className='my-2'>
+            <Label htmlFor="name">Full Name</Label>
+            <Input
+              type='text'
+              id="name"
+              value={input.name}
+              name='name'
+              onChange={changeEventHandler}
+              placeholder='Sam Walker'
+            />
           </div>
-          <div className=' my-2'>
-            <Label>Email</Label>
-            <Input type='email' value={input.email} name='email' onChange={changeEventHandler} placeholder='samWalker@gmail.com'></Input>
+          <div className='my-2'>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              type='email'
+              id="email"
+              value={input.email}
+              name='email'
+              onChange={changeEventHandler}
+              placeholder='samwalker@gmail.com'
+            />
           </div>
-          <div className=' my-2'>
-            <Label>Phonne Number</Label>
-            <Input type='tel' value={input.phoneNumber} name='phoneNumber' onChange={changeEventHandler} placeholder='+1234567890'></Input>
+          <div className='my-2'>
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Input
+              type='tel'
+              id="phoneNumber"
+              value={input.phoneNumber}
+              name='phoneNumber'
+              onChange={changeEventHandler}
+              placeholder='+1234567890'
+            />
           </div>
-          <div className=' my-2'>
-            <Label>Password</Label>
-            <Input type='password'value={input.password} name='password' onChange={changeEventHandler} placeholder='********'></Input>
+          <div className='my-2'>
+            <Label htmlFor="password">Password</Label>
+            <Input
+              type='password'
+              id="password"
+              value={input.password}
+              name='password'
+              onChange={changeEventHandler}
+              placeholder='********'
+            />
           </div>
-          <div className='flex item-center justify-between'>
-            
+          <div className='flex items-center justify-between'>
             <RadioGroup className='flex items-center gap-4 my-5'>
               <div className="flex items-center space-x-2">
-                <Input type='radio' name='role' value='Student'
-                  checked= {input.role === 'Student'}
-                  onChange ={changeEventHandler}
-                  className='cursor-pinter' />
-                <Label htmlFor="r1">Student</Label>
+                <Input
+                  type='radio'
+                  name='role'
+                  id="r1"
+                  value='Job Seeker'
+                  checked={input.role === 'Job Seeker'}
+                  onChange={changeEventHandler}
+                  className='cursor-pointer'
+                />
+                <Label htmlFor="r1">Job Seeker</Label>
               </div>
               <div className="flex items-center space-x-2">
-                 <Input type='radio' name='role' value='Recruiter'
-                  checked= {input.role === 'Recruiter'}
-                  onChange ={changeEventHandler}
-                 className='cursor-pinter' />
-                <Label htmlFor="r2">Recruiter</Label>
+                <Input
+                  type='radio'
+                  name='role'
+                  id="r2"
+                  value='Employer'
+                  checked={input.role === 'Employer'}
+                  onChange={changeEventHandler}
+                  className='cursor-pointer'
+                />
+                <Label htmlFor="r2">Employer</Label>
               </div>
             </RadioGroup>
           </div>
-          <button type="submit" className='block w-full py-3 my-3 text-white bg-lime-700 hover:bg-primary/90 rounded-md'>
-            Register
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={`block w-full py-3 my-3 text-white rounded-md transition-colors ${loading ? 'bg-lime-600 opacity-70 cursor-not-allowed' : 'bg-lime-700 hover:bg-lime-800'}`}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="animate-spin h-5 w-5" />
+                Processing...
+              </span>
+            ) : "Register"}
           </button>
-          {/* already account then login */}
-          <p className='text-green-700 text-md my-2'>
-            Already have an acount? 
-            <Link to="/login" className='text-blue-950 font-bold'>Login</Link>
+
+          <p className='text-gray-600 text-sm my-2 text-center'>
+            Already have an account?
+            <Link to="/login" className='text-blue-700 font-bold ml-1 hover:underline'>Login</Link>
           </p>
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;
