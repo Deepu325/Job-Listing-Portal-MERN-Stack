@@ -1,4 +1,5 @@
- import { Button } from "@/components/ui/button"
+import ProtectedRoute from "./routes/ProtectedRoute";
+import { Button } from "@/components/ui/button"
 import Navbar from "./components/ui/components_lite/Navbar"
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import Login from "./components/ui/authentication/Login";
@@ -9,9 +10,15 @@ import Home from "./components/ui/components_lite/Home";
 
 // creating browser based router
 const appRouter = createBrowserRouter([ //configuration based routing(Array of routes)
-  {path: "/",
-    element: <Home/>
-  },
+  {
+  path: "/",
+  element: (
+    <ProtectedRoute>
+      <Home />
+    </ProtectedRoute>
+  )
+},
+
   {
     path:"/login",
     element: <Login/>
