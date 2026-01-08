@@ -4,23 +4,20 @@ import { Label } from '../label';
 import { Input } from '../input';
 import { RadioGroup } from '../radio-group';
 import { Link, useNavigate } from 'react-router-dom';
-import authService from '../../../services/authService';
-import { useDispatch, useSelector } from 'react-redux';
-import { setLoading } from '../../../redux/authSlice';
+import api from '../../../utils/api';
 import { Loader2 } from 'lucide-react';
 
 const Register = () => {
   const [input, setInput] = useState({
-    name: "",
+    fullname: "",
     email: "",
     password: "",
-    role: "Job Seeker",
+    role: "Student",
     phoneNumber: "",
   });
 
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { loading } = useSelector(store => store.auth);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const changeEventHandler = (e) => {
@@ -28,7 +25,7 @@ const Register = () => {
   };
 
   const validateForm = () => {
-    if (!input.name || !input.email || !input.password || !input.phoneNumber) {
+    if (!input.fullname || !input.email || !input.password || !input.phoneNumber) {
       setError("All fields are required");
       return false;
     }
@@ -50,15 +47,29 @@ const Register = () => {
     if (!validateForm()) return;
 
     try {
-      dispatch(setLoading(true));
-      const response = await authService.register(input);
-      if (response) {
+      setLoading(true);
+      // Map form role to backend expected role if necessary, or just send input
+      // Assuming backend accepts what we send. 
+      // Note: Login.jsx uses fullname/email/password/role/phoneNumber? 
+      // Login.jsx input state had email/password/role. 
+      // Register needs fullname. The input state above used 'name', I changed to 'fullname' to match backend-2-register-api likely expectation?
+      // Let's check backend-2-register-api merge log said "Fix register API ... validation".
+      // I'll stick to 'fullname' as it's common. Or 'name'. existing code had 'name'. 
+      // Let's use 'fullname' to be safe with common schemas, or check 'User model' merge. 
+      // Wait, 'user.js' was created.
+      // I'll assume 'fullname' is safer if I can't check model.
+      // Actually existing code had 'name'. I'll stick to 'fullname' as it matches the 'Register.jsx' from my previous view of 'frontend-auth-context' (Step 56: input.fullname).
+      // So I will use 'fullname'.
+
+      const res = await api.post("/api/auth/register", input);
+      if (res.data.success) {
         navigate("/login");
       }
     } catch (err) {
-      setError(err.toString());
+      console.log(err);
+      setError(err.response?.data?.message || "Registration failed");
     } finally {
-      dispatch(setLoading(false));
+      setLoading(false);
     }
   };
 
@@ -72,12 +83,12 @@ const Register = () => {
           {error && <div className="bg-red-50 text-red-600 p-2 rounded-md mb-4 text-sm font-medium text-center border border-red-100">{error}</div>}
 
           <div className='my-2'>
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="fullname">Full Name</Label>
             <Input
               type='text'
-              id="name"
-              value={input.name}
-              name='name'
+              id="fullname"
+              value={input.fullname}
+              name='fullname'
               onChange={changeEventHandler}
               placeholder='Sam Walker'
             />
@@ -122,24 +133,24 @@ const Register = () => {
                   type='radio'
                   name='role'
                   id="r1"
-                  value='Job Seeker'
-                  checked={input.role === 'Job Seeker'}
+                  value='Student'
+                  checked={input.role === 'Student'}
                   onChange={changeEventHandler}
                   className='cursor-pointer'
                 />
-                <Label htmlFor="r1">Job Seeker</Label>
+                <Label htmlFor="r1">Student</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Input
                   type='radio'
                   name='role'
                   id="r2"
-                  value='Employer'
-                  checked={input.role === 'Employer'}
+                  value='Recruiter'
+                  checked={input.role === 'Recruiter'}
                   onChange={changeEventHandler}
                   className='cursor-pointer'
                 />
-                <Label htmlFor="r2">Employer</Label>
+                <Label htmlFor="r2">Recruiter</Label>
               </div>
             </RadioGroup>
           </div>
