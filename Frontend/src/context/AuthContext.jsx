@@ -4,12 +4,7 @@ import { getToken, removeToken, setToken } from '../utils/AuthHelpers';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuth, setIsAuth] = useState(false);
-
-  useEffect(() => {
-    const token = getToken();
-    if (token) setIsAuth(true);
-  }, []);
+  const [isAuth, setIsAuth] = useState(() => !!getToken());
 
   const login = (token) => {
     setToken(token);

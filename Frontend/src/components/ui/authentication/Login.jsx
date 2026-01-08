@@ -1,29 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Navbar from "../components_lite/Navbar";
 import { Label } from "../label";
 import { Input } from "../input";
 import { RadioGroup, RadioGroupItem } from "../radio-group";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../../context/AuthContext";
+import api from "../../../utils/api";
 
 const Login = () => {
 
-  const[input , setInput] = useState({
-    
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const [input, setInput] = useState({
+
     email: "",
-    password:"",
+    password: "",
     role: " ",
-    
+
   });
-  
-  const changeEventHandler = (e) =>{
-    setInput({...input,[e.target.name]: e.target.value});
+
+  const changeEventHandler = (e) => {
+    setInput({ ...input, [e.target.name]: e.target.value });
   }
-  
-  const submitHandler =  async (e)=>{
+
+  const submitHandler = async (e) => {
     e.preventDefault();
-    console.log(input);
+    try {
+      const res = await api.post("/api/auth/login", input);
+      if (res.data.success) {
+        login(res.data.token);
+        navigate("/");
+      }
+    } catch (error) {
+      console.log(error);
+      alert(error.response?.data?.message || "Login failed");
+    }
   }
-  
+
 
 
   return (
@@ -39,7 +53,7 @@ const Login = () => {
           </h1>
           <div className=" my-2">
             <Label>Email</Label>
-            <Input type="email" value={input.email} name='email' onChange={changeEventHandler}  placeholder="samWalker@gmail.com"></Input>
+            <Input type="email" value={input.email} name='email' onChange={changeEventHandler} placeholder="samWalker@gmail.com"></Input>
           </div>
           <div className=" my-2">
             <Label>Password</Label>
@@ -52,8 +66,8 @@ const Login = () => {
                   type="radio"
                   name="role"
                   value="Student"
-                  checked= {input.role === 'Student'}
-                  onChange ={changeEventHandler}
+                  checked={input.role === 'Student'}
+                  onChange={changeEventHandler}
                   className="cursor-pinter"
                 />
                 <Label htmlFor="r1">Student</Label>
@@ -63,8 +77,8 @@ const Login = () => {
                   type="radio"
                   name="role"
                   value="Recruiter"
-                  checked= {input.role === 'Recruiter'}
-                  onChange ={changeEventHandler}
+                  checked={input.role === 'Recruiter'}
+                  onChange={changeEventHandler}
                   className="cursor-pinter"
                 />
                 <Label htmlFor="r2">Recruiter</Label>
@@ -76,7 +90,7 @@ const Login = () => {
           </button>
           {/* already account then login */}
           <p className="text-green-700 text-center my-2">
-             Create new Account
+            Create new Account
             <Link to="/register" className="text-blue-950">
               <button className=" w-1/2 py-3 my-3 text-white flex items-center justify-center max-w-7xl mx-auto bg-gray-800 hover:bg-primary/90 rounded-md">
                 Register
