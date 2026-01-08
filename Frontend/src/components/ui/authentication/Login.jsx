@@ -1,156 +1,102 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Navbar from "../components_lite/Navbar";
 import { Label } from "../label";
 import { Input } from "../input";
 import { RadioGroup } from "../radio-group";
 import { Link, useNavigate } from "react-router-dom";
-import authService from "../../../services/authService";
-import { useDispatch, useSelector } from "react-redux";
-import { setLoading, setUser } from "../../../redux/authSlice";
-import { Loader2 } from "lucide-react";
+import { AuthContext } from "../../../context/AuthContext";
+import api from "../../../utils/api";
 
 const Login = () => {
+
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [input, setInput] = useState({
+
     email: "",
     password: "",
-    role: "Job Seeker",
-  });
+    role: " ",
 
-  const [error, setError] = useState("");
-  const { loading } = useSelector((store) => store.auth);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  });
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
-  };
-
-  const validateForm = () => {
-    if (!input.email || !input.password) {
-      setError("All fields are required");
-      return false;
-    }
-    if (!input.email.match(/^\S+@\S+\.\S+$/)) {
-      setError("Please enter a valid email address");
-      return false;
-    }
-    return true;
-  };
+  }
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    setError("");
-
-    if (!validateForm()) return;
-
     try {
-      dispatch(setLoading(true));
-      const response = await authService.login(input);
-      if (response) {
-        dispatch(setUser(response.user));
-        localStorage.setItem("token", response.token);
+      const res = await api.post("/api/auth/login", input);
+      if (res.data.success) {
+        login(res.data.token);
         navigate("/");
       }
-    } catch (err) {
-      setError(err.toString());
-    } finally {
-      dispatch(setLoading(false));
+    } catch (error) {
+      console.log(error);
+      alert(error.response?.data?.message || "Login failed");
     }
-  };
+  }
+
+
 
   return (
     <div>
-      <Navbar />
+      <Navbar></Navbar>
       <div className="flex items-center justify-center max-w-7xl mx-auto">
         <form
           onSubmit={submitHandler}
-          className="w-1/2 border border-gray-200 rounded-md p-4 my-10 shadow-sm"
+          className="w-1/2 border border-grey-500 rounded-md p-4 my-10"
         >
           <h1 className="font-bold text-xl mb-5 text-center text-green-900">
-            Welcome Back
+            Login
           </h1>
-
-          {error && (
-            <div className="bg-red-50 text-red-600 p-2 rounded-md mb-4 text-sm font-medium text-center border border-red-100">
-              {error}
-            </div>
-          )}
-
-          <div className="my-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              type="email"
-              id="email"
-              value={input.email}
-              name="email"
-              onChange={changeEventHandler}
-              placeholder="samwalker@gmail.com"
-            />
+          <div className=" my-2">
+            <Label>Email</Label>
+            <Input type="email" value={input.email} name='email' onChange={changeEventHandler} placeholder="samWalker@gmail.com"></Input>
           </div>
-          <div className="my-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              type="password"
-              id="password"
-              value={input.password}
-              name="password"
-              onChange={changeEventHandler}
-              placeholder="********"
-            />
+          <div className=" my-2">
+            <Label>Password</Label>
+            <Input type="password" value={input.password} name='password' onChange={changeEventHandler} placeholder="********"></Input>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex item-center justify-between">
             <RadioGroup className="flex items-center gap-4 my-5">
               <div className="flex items-center space-x-2">
                 <Input
                   type="radio"
                   name="role"
-                  id="r1"
-                  value="Job Seeker"
-                  checked={input.role === "Job Seeker"}
+                  value="Student"
+                  checked={input.role === 'Student'}
                   onChange={changeEventHandler}
-                  className="cursor-pointer"
+                  className="cursor-pinter"
                 />
-                <Label htmlFor="r1">Job Seeker</Label>
+                <Label htmlFor="r1">Student</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Input
                   type="radio"
                   name="role"
-                  id="r2"
-                  value="Employer"
-                  checked={input.role === "Employer"}
+                  value="Recruiter"
+                  checked={input.role === 'Recruiter'}
                   onChange={changeEventHandler}
-                  className="cursor-pointer"
+                  className="cursor-pinter"
                 />
-                <Label htmlFor="r2">Employer</Label>
+                <Label htmlFor="r2">Recruiter</Label>
               </div>
             </RadioGroup>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`block w-full py-3 my-3 text-white rounded-md transition-colors ${loading
-                ? "bg-lime-600 opacity-70 cursor-not-allowed"
-                : "bg-lime-700 hover:bg-lime-800"
-              }`}
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="animate-spin h-5 w-5" />
-                Signing in...
-              </span>
-            ) : (
-              "Login"
-            )}
+          <button className=" w-3/4 py-3 my-3 text-white flex items-center justify-center max-w-7xl mx-auto bg-lime-700 hover:bg-primary/90 rounded-md">
+            Login
           </button>
-
-          <div className="text-center my-4 text-gray-500 text-sm">
-            Don't have an account?
-            <Link to="/register" className="text-blue-700 font-bold ml-1 hover:underline">
-              Register Here
+          {/* already account then login */}
+          <p className="text-green-700 text-center my-2">
+            Create new Account
+            <Link to="/register" className="text-blue-950">
+              <button className=" w-1/2 py-3 my-3 text-white flex items-center justify-center max-w-7xl mx-auto bg-gray-800 hover:bg-primary/90 rounded-md">
+                Register
+              </button>
             </Link>
-          </div>
+          </p>
         </form>
       </div>
     </div>
