@@ -1,9 +1,10 @@
 import User from "../../models/User.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     // 1. Input validation
     if (!name || !email || !password) {
@@ -24,15 +25,11 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // 3. Save user (Password hashing is handled by the pre-save hook in User model - Step 5 says retain hashing logic, but Step 6 says hash here? Actually User model already has it. I'll hash here to be safe if the model doesn't have it, or check the model again.)
-    // Actually, I updated the model in backend-1 with a pre-save hook. 
-    // If I hash here AND in the pre-save hook, it will be double hashed. 
-    // I will check the model first.
-
     const newUser = new User({
       name,
       email,
       password: password, // Pre-save hook will hash it
+      role: role || "Job Seeker"
     });
 
     await newUser.save();
@@ -55,3 +52,64 @@ export const register = async (req, res) => {
     });
   }
 };
+
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1. Validation
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // 2. Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // 3. Check password
+    const isMatched = await bcrypt.compare(password, user.password);
+    if (!isMatched) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // 4. Generate JWT
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET || "default_secret",
+      { expiresIn: "1d" }
+    );
+
+    // 5. Respond
+    res.status(200).json({
+      message: `Welcome back, ${user.name}`,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    console.error(`Login error: ${error.message}`);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Test protected route controller
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(`GetMe error: ${error.message}`);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
