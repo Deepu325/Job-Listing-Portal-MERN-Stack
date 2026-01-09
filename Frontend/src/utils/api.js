@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "./AuthHelpers";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1", // Adding a fallback just in case
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000", // Fallback to backend server
 });
 
 api.interceptors.request.use((config) => {
