@@ -6,10 +6,17 @@ import { RadioGroup } from "../radio-group";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import api from "../../../utils/api";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading } from "@/redux/authSlice";
+import store from "@/redux/store";
+import { Button } from "../button";
+import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading } = useSelector((store) => store.auth);
 
   const [input, setInput] = useState({
     email: "",
@@ -24,6 +31,7 @@ const Login = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
+      dispatch(setLoading(true));
       const res = await api.post("/login", input);
       if (res.data.token) {
         alert("Login Successful");
@@ -33,8 +41,9 @@ const Login = () => {
     } catch (error) {
       console.error(error);
       alert(error.response?.data?.message || "Login failed");
+    } finally {
+      dispatch(setLoading(false));
     }
-
   };
 
   return (
@@ -99,14 +108,21 @@ const Login = () => {
               </div>
             </RadioGroup>
           </div>
+          {loading ? (
+             <div className="flex items-center justify-center my-10">
+                <div className="spinner-border text-blue-600" role="status">
+                  <span className="sr-only">Loading...</span>
+                </div>
+             </div>
+          ) : (
+            <button
+              type="submit"
+              className="w-3/4 py-3 my-3 text-white flex items-center justify-center mx-auto bg-lime-700 hover:bg-primary/90 rounded-md">
+              Login
+            </button>
+          )}
 
-          <button type="submit" className="w-3/4 py-3 my-3 text-white flex items-center justify-center mx-auto bg-lime-700 hover:bg-primary/90 rounded-md">
-            Login
-          </button>
-
-          <p className="text-green-700 text-center my-2">
-            Create new Account
-          </p>
+          <p className="text-green-700 text-center my-2">Create new Account</p>
           <Link to="/register">
             <button className="w-1/2 py-3 my-3 text-white flex items-center justify-center mx-auto bg-gray-800 rounded-md">
               Register

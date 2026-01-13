@@ -54,7 +54,10 @@ const Navbar = () => {
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className='flex w-fit items-center gap-2 cursor-pinter'>
-                                            <Button variant="link">Profile</Button>
+                                            <Button variant="link">
+                                                {" "}
+                                                 <Link to={"/profile"}> Profile</Link>{" "}   
+                                            </Button>
                                         </div>
                                         <div className='flex w-fit items-center gap-2 cursor-pinter'>
                                             <Button variant="link" onClick={logout}>Logout</Button>
