@@ -6,6 +6,7 @@ import { RadioGroup } from "../radio-group";
 import { Link, useNavigate } from "react-router-dom";
 import authService from "../../../services/authService";
 import { Loader2 } from "lucide-react";
+import { useDispatch } from "react-redux";
 
 const Register = () => {
   const [input, setInput] = useState({
@@ -19,7 +20,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };

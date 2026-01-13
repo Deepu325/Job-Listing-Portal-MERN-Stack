@@ -1,6 +1,9 @@
 import React from 'react'
 import Navbar from './Navbar'
 import { useSelector } from 'react-redux'
+import Header from './Header';
+import Categories from './Categories';
+import LatestJobs from './LatestJobs';
 
 const Home = () => {
   const { user } = useSelector(store => store.auth);
@@ -8,7 +11,10 @@ const Home = () => {
   return (
     <div>
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+      <Header/>
+      <Categories/>
+      <LatestJobs/>
+      {/* <div className="max-w-7xl mx-auto px-4 py-20 text-center">
         <h1 className="text-5xl font-extrabold text-gray-900 mb-6">
           Find Your <span className="text-green-600">Dream Job</span> Today
         </h1>
@@ -28,7 +34,8 @@ const Home = () => {
             Welcome back, {user.name}! 🚀
           </h2>
         )}
-      </div>
+      </div> */}
+      
     </div>
   )
 }
