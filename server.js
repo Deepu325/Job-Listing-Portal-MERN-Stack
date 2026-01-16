@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./server/routes/authRoutes.js";
+import employerProfileRoutes from "./server/routes/employerProfileRoutes.js";
 
 dotenv.config();        // Load environment variables
 connectDB();            // Connect MongoDB Atlas
@@ -15,6 +16,7 @@ app.use(express.json());  // Middleware to read JSON data from requests
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/profile", employerProfileRoutes);
 
 // Test route (health check)
 app.get("/", (req, res) => {
