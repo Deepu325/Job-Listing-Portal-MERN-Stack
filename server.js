@@ -15,6 +15,8 @@ app.use(express.json());  // Middleware to read JSON data from requests
 
 // API Routes
 app.use("/api/auth", authRoutes);
+import jobSeekerRoutes from "./server/routes/jobSeekerRoutes.js";
+app.use("/api/v1/profile/jobseeker", jobSeekerRoutes);
 
 // Test route (health check)
 app.get("/", (req, res) => {
