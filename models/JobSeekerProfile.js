@@ -33,6 +33,13 @@ const jobSeekerProfileSchema = new mongoose.Schema(
 
     experience: {
       type: String
+    },
+
+    resume: {
+      type: String // Path to file
+    },
+    resumeOriginalName: {
+      type: String
     }
   },
   {
