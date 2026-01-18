@@ -1,70 +1,68 @@
-import EmployerProfile from "../models/EmployerProfile.js";
-import User from "../../models/User.js";
+import EmployerProfile from "../../models/EmployerProfile.js";
 
 // @desc    Get current employer profile
-// @route   GET /api/profile/employer
+// @route   GET /api/v1/profile/employer
 // @access  Private (Employer only)
 export const getEmployerProfile = async (req, res) => {
     try {
-        // 1. Check if user is an Employer
+        // Role check (Double check, though middleware should handle generalized auth, we need specific role check)
+        // Assuming authMiddleware adds req.user = { userId, role }
         if (req.user.role !== "Employer") {
-            return res.status(403).json({ message: "Access denied. Employer account required." });
+            return res.status(403).json({ message: "Access denied. Employers only." });
         }
 
-        // 2. Find profile
-        const profile = await EmployerProfile.findOne({ userId: req.user.userId });
+        const profile = await EmployerProfile.findOne({ userId: req.user.userId }).populate("userId", "name email");
 
         if (!profile) {
-            return res.status(404).json({ message: "Employer profile not found" });
+            return res.status(404).json({ message: "Profile not found" });
         }
 
         res.status(200).json(profile);
     } catch (error) {
-        console.error(`GetProfile error: ${error.message}`);
-        res.status(500).json({ message: "Server error" });
+        console.error(`Get Employer Profile Error: ${error.message}`);
+        res.status(500).json({ message: "Server Error" });
     }
 };
 
 // @desc    Create or update employer profile
-// @route   PUT /api/profile/employer
+// @route   POST /api/v1/profile/employer
 // @access  Private (Employer only)
-export const updateEmployerProfile = async (req, res) => {
+export const createOrUpdateEmployerProfile = async (req, res) => {
+    const { companyName, description, location, website } = req.body;
+
+    if (req.user.role !== "Employer") {
+        return res.status(403).json({ message: "Access denied. Employers only." });
+    }
+
+    // Build profile object
+    const profileFields = {
+        userId: req.user.userId,
+        companyName,
+        description,
+        location,
+        website
+    };
+
     try {
-        // 1. Check if user is an Employer
-        if (req.user.role !== "Employer") {
-            return res.status(403).json({ message: "Access denied. Employer account required." });
+        let profile = await EmployerProfile.findOne({ userId: req.user.userId });
+
+        if (profile) {
+            // Update
+            profile = await EmployerProfile.findOneAndUpdate(
+                { userId: req.user.userId },
+                { $set: profileFields },
+                { new: true }
+            );
+            return res.status(200).json(profile);
         }
 
-        const { companyName, companyDescription, companyEmail, phone, location } = req.body;
-
-        // 2. Build profile object
-        const profileFields = {
-            userId: req.user.userId,
-            companyName,
-            companyDescription,
-            companyEmail,
-            phone,
-            location
-        };
-
-        // 3. Upsert profile (Create if valid, Update if exists)
-        // Using findOneAndUpdate with upsert: true
-        const profile = await EmployerProfile.findOneAndUpdate(
-            { userId: req.user.userId },
-            { $set: profileFields },
-            { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }
-        );
-
-        res.status(200).json({
-            message: "Employer profile updated successfully",
-            profile
-        });
+        // Create
+        profile = new EmployerProfile(profileFields);
+        await profile.save();
+        res.status(201).json(profile);
 
     } catch (error) {
-        console.error(`UpdateProfile error: ${error.message}`);
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: "Server error" });
+        console.error(`Create Employer Profile Error: ${error.message}`);
+        res.status(500).json({ message: "Server Error" });
     }
 };
