@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./server/routes/authRoutes.js";
+import jobSeekerRoutes from "./server/routes/jobSeekerRoutes.js";
+import employerRoutes from "./server/routes/employerRoutes.js";
 
 dotenv.config();        // Load environment variables
 connectDB();            // Connect MongoDB Atlas
@@ -15,8 +17,8 @@ app.use(express.json());  // Middleware to read JSON data from requests
 
 // API Routes
 app.use("/api/auth", authRoutes);
-import jobSeekerRoutes from "./server/routes/jobSeekerRoutes.js";
 app.use("/api/v1/profile/jobseeker", jobSeekerRoutes);
+app.use("/api/v1/profile/employer", employerRoutes);
 
 // Test route (health check)
 app.get("/", (req, res) => {
