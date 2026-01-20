@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-import Navbar from "../components_lite/Navbar";
 import { Label } from "../label";
 import { Input } from "../input";
 import { RadioGroup } from "../radio-group";
@@ -10,7 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "@/redux/authSlice";
 import store from "@/redux/store";
 import { Button } from "../button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 const Login = () => {
   const { login } = useContext(AuthContext);
@@ -23,6 +23,7 @@ const Login = () => {
     password: "",
     role: "Job Seeker", // ✅ MUST match backend enum
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -32,15 +33,19 @@ const Login = () => {
     e.preventDefault();
     try {
       dispatch(setLoading(true));
-      const res = await api.post("/login", input);
+      const res = await api.post("/api/auth/login", input);
       if (res.data.token) {
-        alert("Login Successful");
-        login(res.data.token);
+        toast.success("Welcome back!", {
+          description: "You have successfully logged in.",
+        });
+        login(res.data.token, res.data.user);
         navigate("/");
       }
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || "Login failed");
+      toast.error("Login Failed", {
+        description: error.response?.data?.message || "Please check your credentials and try again.",
+      });
     } finally {
       dispatch(setLoading(false));
     }
@@ -48,7 +53,6 @@ const Login = () => {
 
   return (
     <div>
-      <Navbar />
       <div className="flex items-center justify-center max-w-7xl mx-auto">
         <form
           onSubmit={submitHandler}
@@ -71,13 +75,23 @@ const Login = () => {
 
           <div className="my-2">
             <Label>Password</Label>
-            <Input
-              type="password"
-              name="password"
-              value={input.password}
-              onChange={changeEventHandler}
-              placeholder="********"
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={input.password}
+                onChange={changeEventHandler}
+                placeholder="********"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           {/* Role */}
@@ -109,11 +123,11 @@ const Login = () => {
             </RadioGroup>
           </div>
           {loading ? (
-             <div className="flex items-center justify-center my-10">
-                <div className="spinner-border text-blue-600" role="status">
-                  <span className="sr-only">Loading...</span>
-                </div>
-             </div>
+            <div className="flex items-center justify-center my-10">
+              <div className="spinner-border text-blue-600" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+            </div>
           ) : (
             <button
               type="submit"

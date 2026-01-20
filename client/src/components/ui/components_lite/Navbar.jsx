@@ -7,8 +7,8 @@ import { Avatar, AvatarImage } from '../avatar'
 
 
 const Navbar = () => {
-    const { isAuth, logout } = useContext(AuthContext);
-    const user = isAuth; //if user then popover otherwise login and register 
+    const { user, logout } = useContext(AuthContext);
+
     return (
         <div className="bg-white">
             <div className='flex items-center justify-between mx-auto max-w-7xl h-16'>
@@ -19,9 +19,9 @@ const Navbar = () => {
                 </div>
                 <div className='flex item-center gap-10'>
                     <ul className="flex font medium items-center gap-7">
-                        <li>Home</li>
-                        <li>Browse</li>
-                        <li>Job</li>
+                        <li><Link to="/">Home</Link></li>
+                        <li><Link to="/browse">Browse</Link></li>
+                        <li><Link to="/jobs">Jobs</Link></li>
                     </ul>
                     {
                         !user ? (
@@ -39,24 +39,24 @@ const Navbar = () => {
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Avatar className='cursor-pointer'>
-                                        <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                                        <AvatarImage src={user?.profile?.profilePhoto || "https://github.com/shadcn.png"} alt="@shadcn" />
                                     </Avatar>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-80">
                                     <div className='flex items-center gap-4 space-y-2'>
                                         <Avatar className='cursor-pointer'>
-                                            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                                            <AvatarImage src={user?.profile?.profilePhoto || "https://github.com/shadcn.png"} alt="@shadcn" />
                                         </Avatar>
                                         <div>
-                                            <h3 className='font-medium'>Arkasmit Sengupta</h3>
-                                            <p className='text-sm text-muted-foreground'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Optio, illum?</p>
+                                            <h3 className='font-medium'>{user?.fullname || user?.name}</h3>
+                                            <p className='text-sm text-muted-foreground'>{user?.email}</p>
                                         </div>
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className='flex w-fit items-center gap-2 cursor-pinter'>
                                             <Button variant="link">
                                                 {" "}
-                                                 <Link to={"/profile"}> Profile</Link>{" "}   
+                                                <Link to={"/profile"}> Profile</Link>{" "}
                                             </Button>
                                         </div>
                                         <div className='flex w-fit items-center gap-2 cursor-pinter'>
