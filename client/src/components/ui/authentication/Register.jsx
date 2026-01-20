@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import Navbar from "../components_lite/Navbar";
 import { Label } from "../label";
 import { Input } from "../input";
 import { RadioGroup } from "../radio-group";
 import { Link, useNavigate } from "react-router-dom";
 import authService from "../../../services/authService";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useDispatch } from "react-redux";
 
 const Register = () => {
@@ -19,6 +18,7 @@ const Register = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const changeEventHandler = (e) => {
@@ -61,7 +61,6 @@ const Register = () => {
 
   return (
     <div>
-      <Navbar />
 
       <div className="flex items-center justify-center max-w-7xl mx-auto">
         <form
@@ -120,14 +119,24 @@ const Register = () => {
           {/* Password */}
           <div className="my-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              type="password"
-              id="password"
-              name="password"
-              value={input.password}
-              onChange={changeEventHandler}
-              placeholder="********"
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={input.password}
+                onChange={changeEventHandler}
+                placeholder="********"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           {/* Role */}
@@ -163,11 +172,10 @@ const Register = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`block w-full py-3 my-3 text-white rounded-md transition-colors ${
-              loading
-                ? "bg-lime-600 opacity-70 cursor-not-allowed"
-                : "bg-lime-700 hover:bg-lime-800"
-            }`}
+            className={`block w-full py-3 my-3 text-white rounded-md transition-colors ${loading
+              ? "bg-lime-600 opacity-70 cursor-not-allowed"
+              : "bg-lime-700 hover:bg-lime-800"
+              }`}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
