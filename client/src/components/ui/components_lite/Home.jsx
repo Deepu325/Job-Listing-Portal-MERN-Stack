@@ -1,19 +1,19 @@
 import React from 'react'
-import Navbar from './Navbar'
 import { useSelector } from 'react-redux'
 import Header from './Header';
 import Categories from './Categories';
 import LatestJobs from './LatestJobs';
+import FloatingBackground from './FloatingBackground';
 
 const Home = () => {
   const { user } = useSelector(store => store.auth);
 
   return (
-    <div>
-      <Navbar />
-      <Header/>
-      <Categories/>
-      <LatestJobs/>
+    <div className="relative">
+      <FloatingBackground />
+      <Header />
+      <Categories />
+      <LatestJobs />
       {/* <div className="max-w-7xl mx-auto px-4 py-20 text-center">
         <h1 className="text-5xl font-extrabold text-gray-900 mb-6">
           Find Your <span className="text-green-600">Dream Job</span> Today
@@ -35,7 +35,7 @@ const Home = () => {
           </h2>
         )}
       </div> */}
-      
+
     </div>
   )
 }

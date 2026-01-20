@@ -40,6 +40,9 @@ const jobSeekerProfileSchema = new mongoose.Schema(
     },
     resumeOriginalName: {
       type: String
+    },
+    profilePicture: {
+      type: String // Path to profile picture
     }
   },
   {
