@@ -18,7 +18,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Middleware
-app.use(cors());           // Enable CORS
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true
+}
+app.use(cors(corsOptions));
 app.use(express.json());  // Middleware to read JSON data from requests
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded data
 

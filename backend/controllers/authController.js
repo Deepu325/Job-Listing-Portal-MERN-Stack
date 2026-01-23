@@ -37,6 +37,7 @@ export const register = async (req, res) => {
     // 5. Send response
     res.status(201).json({
       message: "User registered successfully",
+      success: true,
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -49,6 +50,7 @@ export const register = async (req, res) => {
     console.error(`Registration error: ${error.message}`);
     res.status(500).json({
       message: "Server error",
+      success: false
     });
   }
 };
@@ -84,6 +86,7 @@ export const login = async (req, res) => {
     // 5. Respond
     res.status(200).json({
       message: `Welcome back, ${user.name}`,
+      success: true,
       token,
       user: {
         id: user._id,
@@ -95,7 +98,7 @@ export const login = async (req, res) => {
 
   } catch (error) {
     console.error(`Login error: ${error.message}`);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", success: false });
   }
 };
 
