@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import jobSeekerRoutes from "./routes/jobSeekerRoutes.js";
 import employerRoutes from "./routes/employerRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
+import applicationRoutes from "./routes/applicationRoutes.js";
 
 dotenv.config();        // Load environment variables
 connectDB();            // Connect MongoDB Atlas
@@ -34,6 +35,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/v1/profile/jobseeker", jobSeekerRoutes);
 app.use("/api/v1/profile/employer", employerRoutes);
 app.use("/api/v1/profile/resume", resumeRoutes);
+app.use("/api", applicationRoutes);
 
 // Test route (health check)
 app.get("/", (req, res) => {
