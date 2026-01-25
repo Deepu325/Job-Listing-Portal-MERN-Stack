@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -38,6 +39,17 @@ app.use("/api/v1/profile/resume", resumeRoutes);
 // Test route (health check)
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Job Portal Backend server is running" });
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error("Global Error Handler:", err);
+  try {
+    fs.appendFileSync("error.log", `${new Date().toISOString()} - ${err.stack}\n`);
+  } catch (e) {
+    console.error("Failed to write to error log", e);
+  }
+  res.status(500).json({ message: "Internal Server Error", error: err.message });
 });
 
 // Port configuration

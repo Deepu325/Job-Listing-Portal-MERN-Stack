@@ -1,6 +1,7 @@
 import express from "express";
 import { getEmployerProfile, createOrUpdateEmployerProfile } from "../controllers/employerProfileController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
+import { imageUpload } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -8,6 +9,6 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get("/", getEmployerProfile);
-router.post("/", createOrUpdateEmployerProfile);
+router.post("/", imageUpload.single("logo"), createOrUpdateEmployerProfile);
 
 export default router;

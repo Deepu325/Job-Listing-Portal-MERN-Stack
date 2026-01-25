@@ -28,9 +28,14 @@ export const getEmployerProfile = async (req, res) => {
 // @route   POST /api/v1/profile/employer
 // @access  Private (Employer only)
 export const createOrUpdateEmployerProfile = async (req, res) => {
-    const { companyName, description, location, website } = req.body;
+    console.log("createOrUpdateEmployerProfile called");
+    console.log("req.body:", req.body);
+    console.log("req.file:", req.file);
+    console.log("req.user:", req.user);
 
-    if (req.user.role !== "Employer") {
+    const { companyName, description, location, website, industry, companyEmail, phone } = req.body;
+
+    if (!req.user || req.user.role !== "Employer") {
         return res.status(403).json({ message: "Access denied. Employers only." });
     }
 
@@ -38,10 +43,17 @@ export const createOrUpdateEmployerProfile = async (req, res) => {
     const profileFields = {
         userId: req.user.userId,
         companyName,
-        description,
+        companyDescription: description, // Mapping 'description' from body to 'companyDescription' in model
         location,
-        website
+        website,
+        industry,
+        companyEmail,
+        phone
     };
+
+    if (req.file) {
+        profileFields.logo = req.file.path.replace(/\\/g, "/"); // Normalize path
+    }
 
     try {
         let profile = await EmployerProfile.findOne({ userId: req.user.userId });
