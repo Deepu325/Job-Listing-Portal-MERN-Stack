@@ -140,6 +140,7 @@ const Jobs = () => {
     const { isAuth } = useContext(AuthContext);
     const { jobs, loading } = useContext(JobContext);
     const [searchTerm, setSearchTerm] = useState('');
+    const [locationFilter, setLocationFilter] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
 
     const categories = ['All', 'Technology', 'Marketing', 'Design', 'Sales', 'Engineering', 'Finance'];
@@ -148,9 +149,10 @@ const Jobs = () => {
         const matchesSearch = job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             job.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             job.description?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesLocation = !locationFilter || job.location?.toLowerCase().includes(locationFilter.toLowerCase());
         const matchesCategory = selectedCategory === 'All' ||
             job.category?.toLowerCase() === selectedCategory.toLowerCase();
-        return matchesSearch && matchesCategory;
+        return matchesSearch && matchesLocation && matchesCategory;
     });
 
     return (
@@ -161,7 +163,7 @@ const Jobs = () => {
                     <h1 className="text-4xl font-bold mb-4">Find Your Perfect Job</h1>
                     <p className="text-green-100 mb-6">Discover opportunities that match your skills and career goals</p>
 
-                    <div className="flex bg-white rounded-lg p-2 max-w-2xl">
+                    <div className="flex flex-col md:flex-row gap-4 bg-white rounded-lg p-2 max-w-4xl">
                         <div className="flex-1 relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
                             <input
@@ -169,10 +171,20 @@ const Jobs = () => {
                                 placeholder="Job title, keywords, or company"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 text-gray-900 outline-none border-r border-gray-200"
+                            />
+                        </div>
+                        <div className="flex-1 relative">
+                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                            <input
+                                type="text"
+                                placeholder="Location"
+                                value={locationFilter}
+                                onChange={(e) => setLocationFilter(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 text-gray-900 outline-none"
                             />
                         </div>
-                        <Button className="bg-green-700 hover:bg-green-800 ml-2">
+                        <Button className="bg-green-700 hover:bg-green-800 md:ml-2">
                             Search Jobs
                         </Button>
                     </div>

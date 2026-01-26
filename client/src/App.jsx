@@ -8,7 +8,8 @@ import Profile from "./components/ui/components_lite/Profile";
 import CreateProfile from "./components/ui/components_lite/CreateProfile";
 import EditProfile from "./components/ui/components_lite/EditProfile";
 import Description from "./components/ui/components_lite/Description";
-import Browse from "./components/ui/components_lite/Browse";
+import CreateEmployerProfile from "./components/ui/components_lite/CreateEmployerProfile";
+
 import Jobs from "./components/ui/components_lite/Jobs";
 import { Toaster } from "sonner";
 
@@ -31,10 +32,7 @@ const appRouter = createBrowserRouter([ //configuration based routing(Array of r
         path: "/register",
         element: <Register />,
       },
-      {
-        path: "/browse",
-        element: <Browse />
-      },
+
       {
         path: "/jobs",
         element: <Jobs />
@@ -54,6 +52,14 @@ const appRouter = createBrowserRouter([ //configuration based routing(Array of r
       {
         path: "/edit-profile",
         element: <EditProfile />
+      },
+      {
+        path: "/create-employer-profile",
+        element: <CreateEmployerProfile />
+      },
+      {
+        path: "/edit-employer-profile",
+        element: <CreateEmployerProfile />
       }
     ]
   }

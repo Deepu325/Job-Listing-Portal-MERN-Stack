@@ -1,205 +1,253 @@
-import React, { useState } from "react";
-import { Label } from "../label";
-import { Input } from "../input";
-import { RadioGroup } from "../radio-group";
-import { Link, useNavigate } from "react-router-dom";
-import authService from "../../../services/authService";
-import { Loader2, Eye, EyeOff } from "lucide-react";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState } from 'react'
+import { Label } from '../label'
+import { Input } from '../input'
+import { RadioGroup } from '../radio-group'
+import { Button } from '../button'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { USER_API_END_POINT } from '@/utils/constant'
+import { toast } from 'sonner'
+import { useDispatch, useSelector } from 'react-redux'
+import { setLoading } from '@/redux/authSlice'
+import { Loader2, Eye, EyeOff } from 'lucide-react'
 
 const Register = () => {
   const [input, setInput] = useState({
     name: "",
     email: "",
-    password: "",
-    role: "Job Seeker", // ✅ MUST match backend enum
     phoneNumber: "",
+    password: "",
+    role: "Job Seeker",
   });
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+  const { loading, user } = useSelector(store => store.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+
+
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
-  };
-
-  const validateForm = () => {
-    if (!input.name || !input.email || !input.password) {
-      setError("All fields are required");
-      return false;
-    }
-    if (!input.email.match(/^\S+@\S+\.\S+$/)) {
-      setError("Please enter a valid email address");
-      return false;
-    }
-    if (input.password.length < 6) {
-      setError("Password must be at least 6 characters long");
-      return false;
-    }
-    return true;
-  };
-
+  }
   const submitHandler = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (!validateForm()) return;
-
-    try {
-      setLoading(true);
-      await authService.register(input);
-      navigate("/login");
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || "Registration failed");
-    } finally {
-      setLoading(false);
+    if (!input.name || !input.email || !input.phoneNumber || !input.password || !input.role) {
+      setError("All fields are required");
+      return;
     }
-  };
+    try {
+      dispatch(setLoading(true));
+      const res = await axios.post(`${USER_API_END_POINT}/register`, {
+        name: input.name,
+        email: input.email,
+        phoneNumber: input.phoneNumber,
+        password: input.password,
+        role: input.role
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        navigate("/login");
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+      toast.error(errorMessage);
+      setError(errorMessage);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [])
 
   return (
-    <div>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-white">
+      {/* 1. GRAIN OVERLAY */}
+      <div
+        className="absolute inset-0 z-0 opacity-[0.04] pointer-events-none mix-blend-overlay"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      ></div>
 
-      <div className="flex items-center justify-center max-w-7xl mx-auto">
-        <form
-          onSubmit={submitHandler}
-          className="w-1/2 border border-gray-200 rounded-md p-4 my-10 shadow-sm"
-        >
-          <h1 className="font-bold text-xl mb-5 text-center text-green-900">
-            Create Account
-          </h1>
-
-          {error && (
-            <div className="bg-red-50 text-red-600 p-2 rounded-md mb-4 text-sm font-medium text-center border border-red-100">
-              {error}
-            </div>
-          )}
-
-          {/* Name */}
-          <div className="my-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              type="text"
-              id="name"
-              name="name"
-              value={input.name}
-              onChange={changeEventHandler}
-              placeholder="Sam Walker"
-            />
-          </div>
-
-          {/* Email */}
-          <div className="my-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              type="email"
-              id="email"
-              name="email"
-              value={input.email}
-              onChange={changeEventHandler}
-              placeholder="samwalker@gmail.com"
-            />
-          </div>
-
-          {/* Phone */}
-          <div className="my-2">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <Input
-              type="tel"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={input.phoneNumber}
-              onChange={changeEventHandler}
-              placeholder="+1234567890"
-            />
-          </div>
-
-          {/* Password */}
-          <div className="my-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                value={input.password}
-                onChange={changeEventHandler}
-                placeholder="********"
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Role */}
-          <div className="flex items-center justify-between">
-            <RadioGroup className="flex items-center gap-4 my-5">
-              <div className="flex items-center space-x-2">
-                <Input
-                  type="radio"
-                  name="role"
-                  value="Job Seeker" // ✅ BACKEND ENUM
-                  checked={input.role === "Job Seeker"}
-                  onChange={changeEventHandler}
-                  className="cursor-pointer"
-                />
-                <Label>Student</Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Input
-                  type="radio"
-                  name="role"
-                  value="Employer" // ✅ BACKEND ENUM
-                  checked={input.role === "Employer"}
-                  onChange={changeEventHandler}
-                  className="cursor-pointer"
-                />
-                <Label>Recruiter</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className={`block w-full py-3 my-3 text-white rounded-md transition-colors ${loading
-              ? "bg-lime-600 opacity-70 cursor-not-allowed"
-              : "bg-lime-700 hover:bg-lime-800"
-              }`}
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="animate-spin h-5 w-5" />
-                Processing...
-              </span>
-            ) : (
-              "Register"
-            )}
-          </button>
-
-          <p className="text-gray-600 text-sm my-2 text-center">
-            Already have an account?
-            <Link
-              to="/login"
-              className="text-blue-700 font-bold ml-1 hover:underline"
-            >
-              Login
-            </Link>
-          </p>
-        </form>
+      {/* 2. AURORA BACKGROUND */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white via-green-50/20 to-white">
+        <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-green-200/30 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob"></div>
+        <div className="absolute top-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-emerald-200/30 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-32 left-[20%] w-[40rem] h-[40rem] bg-teal-100/40 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob animation-delay-4000"></div>
       </div>
-    </div>
-  );
-};
 
-export default Register;
+      <div className="w-full max-w-xl bg-white/30 backdrop-blur-2xl border border-white/50 shadow-2xl rounded-3xl overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-500 transition-all hover:shadow-green-900/5">
+        <div className="p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2 tracking-tight">Create Account</h1>
+            <p className="text-gray-600 text-sm font-medium">Join thousands of professionals finding their dream jobs</p>
+          </div>
+
+          <form onSubmit={submitHandler} className="space-y-5">
+            {error && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium text-center border border-red-100 flex items-center justify-center gap-2 animate-in slide-in-from-top-2">
+                <span>⚠️</span> {error}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <Label className="text-xs font-bold uppercase tracking-wide text-gray-500 ml-1">Full Name</Label>
+                <Input
+                  type="text"
+                  name="name"
+                  value={input.name}
+                  onChange={changeEventHandler}
+
+                  className="h-11 bg-transparent border-gray-300/50 dark:border-gray-700/50 focus:border-green-500 focus:ring-0 focus:bg-white/40 dark:focus:bg-gray-800/40 rounded-xl transition-all duration-200 placeholder:text-gray-400 dark:text-gray-100"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-xs font-bold uppercase tracking-wide text-gray-500 ml-1">Email Address</Label>
+                  <Input
+                    type="email"
+                    name="email"
+                    value={input.email}
+                    onChange={changeEventHandler}
+                    className="h-11 bg-transparent border-gray-300/50 focus:border-green-500 focus:ring-0 focus:bg-white/40 rounded-xl transition-all duration-200 placeholder:text-gray-400"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-bold uppercase tracking-wide text-gray-500 ml-1">Phone Number</Label>
+                  <Input
+                    type="tel"
+                    name="phoneNumber"
+                    value={input.phoneNumber}
+                    onChange={changeEventHandler}
+                    className="h-11 bg-transparent border-gray-300/50 focus:border-green-500 focus:ring-0 focus:bg-white/40 rounded-xl transition-all duration-200 placeholder:text-gray-400"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-bold uppercase tracking-wide text-gray-500 ml-1">Password</Label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={input.password}
+                    onChange={changeEventHandler}
+
+                    className="h-11 bg-transparent border-gray-300/50 dark:border-gray-700/50 focus:border-green-500 focus:ring-0 focus:bg-white/40 dark:focus:bg-gray-800/40 rounded-xl pr-10 transition-all duration-200 placeholder:text-gray-400 dark:text-gray-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-600 transition-colors hover:scale-110 active:scale-95 p-1"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+
+              <RadioGroup className="grid grid-cols-2 gap-4" value={input.role}>
+                <div
+                  className={`flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${input.role === "Job Seeker"
+                    ? "border-green-500/50 bg-green-50/50 text-green-700 shadow-sm"
+                    : "border-gray-200/50 hover:border-green-200/50 hover:bg-white/30 text-gray-600"
+                    }`}
+                  onClick={() => setInput({ ...input, role: "Job Seeker" })}
+                >
+                  <label className="font-medium text-sm cursor-pointer">Job Seeker</label>
+                  <Input
+                    type="radio"
+                    name="role"
+                    value="Job Seeker"
+                    checked={input.role === "Job Seeker"}
+                    onChange={changeEventHandler}
+                    className="hidden"
+                  />
+                </div>
+                <div
+                  className={`flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${input.role === "Employer"
+                    ? "border-green-500/50 bg-green-50/50 text-green-700 shadow-sm"
+                    : "border-gray-200/50 hover:border-green-200/50 hover:bg-white/30 text-gray-600"
+                    }`}
+                  onClick={() => setInput({ ...input, role: "Employer" })}
+                >
+                  <label className="font-medium text-sm cursor-pointer">Recruiter</label>
+                  <Input
+                    type="radio"
+                    name="role"
+                    value="Employer"
+                    checked={input.role === "Employer"}
+                    onChange={changeEventHandler}
+                    className="hidden"
+                  />
+                </div>
+              </RadioGroup>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full h-11 mt-2 text-white font-medium rounded-xl transition-all duration-300 shadow-lg shadow-green-600/20 flex items-center justify-center hover:shadow-green-600/40 hover:-translate-y-0.5 active:scale-[0.98] ${loading
+                ? "bg-green-500 opacity-70 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
+                }`}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                "Create Account"
+              )}
+            </button>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-500">Already a member?</span>
+              </div>
+            </div>
+
+            <div className="text-center text-sm">
+              <Link to="/login" className="font-semibold text-primary hover:text-primary/80 hover:underline transition-colors">
+                Sign in to your account
+              </Link>
+            </div>
+          </form>
+        </div>
+      </div>
+      <style>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 10s infinite;
+        }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+      `}</style>
+    </div>
+  )
+}
+
+export default Register

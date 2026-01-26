@@ -6,6 +6,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import jobRoutes from "./routes/jobRoutes.js";
 import jobSeekerRoutes from "./routes/jobSeekerRoutes.js";
 import employerRoutes from "./routes/employerRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
@@ -32,6 +33,7 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/v1/jobs", jobRoutes);
 app.use("/api/v1/profile/jobseeker", jobSeekerRoutes);
 app.use("/api/v1/profile/employer", employerRoutes);
 app.use("/api/v1/profile/resume", resumeRoutes);

@@ -6,6 +6,8 @@ import { User, Mail, Phone, GraduationCap, Briefcase, FileText, Loader2, X, Arro
 import api from '../../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
+import { useDispatch } from 'react-redux';
+import { setUser } from '@/redux/authSlice';
 import { toast } from 'sonner';
 
 // Education options
@@ -39,6 +41,7 @@ const skillsOptions = {
 
 const EditProfile = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { user } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
@@ -168,6 +171,25 @@ const EditProfile = () => {
 
             setCurrentProfilePicture(res.data.profilePicture);
             setProfilePicture(null);
+
+            // Update Redux state for Navbar
+            if (user) {
+                const updatedUser = { ...user };
+                if (!updatedUser.profile) {
+                    updatedUser.profile = {};
+                }
+
+                updatedUser.profile = {
+                    ...updatedUser.profile,
+                    profilePicture: res.data.profilePicture
+                };
+
+                dispatch(setUser(updatedUser)); // Update Redux
+
+                // Also update localStorage if that's where persistence happens (optional but safer)
+                // Assuming AuthContext reads from localStorage or Redux acts as source of truth
+            }
+
             toast.success('Profile picture updated!');
         } catch (error) {
             console.error('Failed to upload picture', error);

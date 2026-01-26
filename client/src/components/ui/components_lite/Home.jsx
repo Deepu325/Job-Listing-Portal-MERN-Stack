@@ -3,14 +3,11 @@ import { useSelector } from 'react-redux'
 import Header from './Header';
 import Categories from './Categories';
 import LatestJobs from './LatestJobs';
-import FloatingBackground from './FloatingBackground';
-
 const Home = () => {
   const { user } = useSelector(store => store.auth);
 
   return (
     <div className="relative">
-      <FloatingBackground />
       <Header />
       <Categories />
       <LatestJobs />
