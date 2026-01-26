@@ -144,17 +144,11 @@ const Jobs = () => {
 
     const categories = ['All', 'Technology', 'Marketing', 'Design', 'Sales', 'Engineering', 'Finance'];
 
-    const filteredJobs = jobs.filter(job => {
-        const matchesSearch = job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.description?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategory === 'All' ||
-            job.category?.toLowerCase() === selectedCategory.toLowerCase();
-        return matchesSearch && matchesCategory;
-    });
+    
 
     return (
         <div>
+        
             <div className="max-w-7xl mx-auto px-4 py-8">
                 {/* Hero Section */}
                 <div className="bg-gradient-to-r from-green-700 to-green-900 rounded-2xl p-8 mb-8 text-white">
@@ -197,20 +191,20 @@ const Jobs = () => {
                 {/* Results */}
                 <div className="flex justify-between items-center mb-4">
                     <p className="text-gray-600">
-                        <span className="font-semibold text-gray-900">{filteredJobs.length}</span> jobs found
+                        <span className="font-semibold text-gray-900">{jobs.length}</span> jobs found
                     </p>
                 </div>
 
                 {/* Job Cards */}
                 {loading ? (
                     <div className="text-center py-10">Loading jobs...</div>
-                ) : filteredJobs.length === 0 ? (
+                ) : jobs.length === 0 ? (
                     <div className="text-center py-10 text-gray-500">
                         No jobs found. Try adjusting your search or filters.
                     </div>
                 ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredJobs.map((job) => (
+                        {jobs.map((job) => (
                             <Card
                                 key={job._id}
                                 className="hover:shadow-xl transition-all hover:-translate-y-1"
