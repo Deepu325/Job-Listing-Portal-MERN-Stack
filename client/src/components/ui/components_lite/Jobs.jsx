@@ -138,17 +138,30 @@ const dummyJobs = [
 
 const Jobs = () => {
     const { isAuth } = useContext(AuthContext);
-    const { jobs, loading } = useContext(JobContext);
+    const { jobs, loading, fetchJobs } = useContext(JobContext);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
 
     const categories = ['All', 'Technology', 'Marketing', 'Design', 'Sales', 'Engineering', 'Finance'];
 
-    
+    const handleSearch = () => {
+        const params = {};
+        if (searchTerm) params.keyword = searchTerm;
+        if (selectedCategory !== 'All') params.jobType = selectedCategory; // Mapping category to jobType as per current backend
+        fetchJobs(params);
+    };
+
+    const handleCategoryClick = (category) => {
+        setSelectedCategory(category);
+        const params = {};
+        if (searchTerm) params.keyword = searchTerm;
+        if (category !== 'All') params.jobType = category;
+        fetchJobs(params);
+    };
 
     return (
         <div>
-        
+
             <div className="max-w-7xl mx-auto px-4 py-8">
                 {/* Hero Section */}
                 <div className="bg-gradient-to-r from-green-700 to-green-900 rounded-2xl p-8 mb-8 text-white">
@@ -166,7 +179,10 @@ const Jobs = () => {
                                 className="w-full pl-10 pr-4 py-2 text-gray-900 outline-none"
                             />
                         </div>
-                        <Button className="bg-green-700 hover:bg-green-800 ml-2">
+                        <Button
+                            onClick={handleSearch}
+                            className="bg-green-700 hover:bg-green-800 ml-2"
+                        >
                             Search Jobs
                         </Button>
                     </div>
@@ -177,7 +193,7 @@ const Jobs = () => {
                     {categories.map((category) => (
                         <button
                             key={category}
-                            onClick={() => setSelectedCategory(category)}
+                            onClick={() => handleCategoryClick(category)}
                             className={`px-4 py-2 rounded-full font-medium transition-colors ${selectedCategory === category
                                 ? 'bg-green-700 text-white'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
