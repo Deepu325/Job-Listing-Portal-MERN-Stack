@@ -9,7 +9,7 @@ export const applyJob = async (req, res) => {
         const userRole = req.user.role;
 
         // Check if user is a job seeker
-        if (userRole !== "jobseeker") {
+        if (userRole !== "Job Seeker") {
             return res.status(403).json({ message: "Only job seekers can apply for jobs" });
         }
 
@@ -69,7 +69,7 @@ export const getEmployerApplications = async (req, res) => {
         const userId = req.user.userId;
         const userRole = req.user.role;
 
-        if (userRole !== "employer") {
+        if (userRole !== "Employer") {
             return res.status(403).json({ message: "Access denied. Employers only." });
         }
 
