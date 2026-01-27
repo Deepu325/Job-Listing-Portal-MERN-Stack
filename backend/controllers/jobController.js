@@ -15,7 +15,7 @@ export const createJob = async (req, res) => {
         }
 
         // Get employer profile to populate company details
-        const employerProfile = await EmployerProfile.findOne({ userId: req.user._id });
+        const employerProfile = await EmployerProfile.findOne({ userId: req.user.userId });
 
         if (!employerProfile) {
             return res.status(404).json({ message: "Employer profile not found. Please complete your profile first." });
@@ -33,7 +33,7 @@ export const createJob = async (req, res) => {
                 logo: employerProfile.logo,
                 id: employerProfile._id
             },
-            postedBy: req.user._id
+            postedBy: req.user.userId
         });
 
         const savedJob = await job.save();
@@ -117,7 +117,7 @@ export const updateJob = async (req, res) => {
         }
 
         // Check ownership
-        if (job.postedBy.toString() !== req.user._id.toString()) {
+        if (job.postedBy.toString() !== req.user.userId.toString()) {
             return res.status(401).json({ message: "Not authorized to update this job" });
         }
 
@@ -145,7 +145,7 @@ export const deleteJob = async (req, res) => {
         }
 
         // Check ownership
-        if (job.postedBy.toString() !== req.user._id.toString()) {
+        if (job.postedBy.toString() !== req.user.userId.toString()) {
             return res.status(401).json({ message: "Not authorized to delete this job" });
         }
 
