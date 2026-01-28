@@ -1,6 +1,7 @@
 import Job from "../models/Job.js";
 import EmployerProfile from "../models/EmployerProfile.js";
 import User from "../models/User.js";
+import Application from "../models/Application.js";
 
 // @desc    Create a new job
 // @route   POST /api/v1/jobs
@@ -207,9 +208,12 @@ export const deleteJob = async (req, res) => {
             return res.status(401).json({ message: "Not authorized to delete this job" });
         }
 
+        // Delete associated applications
+        await Application.deleteMany({ job: req.params.id });
+
         await job.deleteOne();
 
-        res.status(200).json({ message: "Job removed" });
+        res.status(200).json({ message: "Job removed and applications cleaned up" });
     } catch (error) {
         console.error("Error deleting job:", error);
         res.status(500).json({ message: "Server Error", error: error.message });
