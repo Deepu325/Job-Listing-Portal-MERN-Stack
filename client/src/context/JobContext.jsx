@@ -132,22 +132,27 @@ export const JobProvider = ({ children }) => {
         },
     ];
 
-    const fetchJobs = async () => {
+    const fetchJobs = async (params = {}) => {
         try {
             setLoading(true);
-            const res = await api.get('/api/v1/jobs');
+            const res = await api.get('/api/v1/jobs', { params });
             const fetchedJobs = res.data.jobs || res.data || [];
 
-            // Use dummy data if fetch returns empty
             if (fetchedJobs.length > 0) {
                 setJobs(fetchedJobs);
-            } else {
+            } else if (Object.keys(params).length === 0) {
                 setJobs(dummyJobs);
+            } else {
+                setJobs([]);
             }
             setError(null);
         } catch (err) {
-            console.error('Failed to fetch jobs, using dummy data', err);
-            setJobs(dummyJobs); // Fallback to dummy data on error
+            console.error('Failed to fetch jobs', err);
+            if (Object.keys(params).length === 0) {
+                setJobs(dummyJobs);
+            } else {
+                setJobs([]);
+            }
             setError(err);
         } finally {
             setLoading(false);

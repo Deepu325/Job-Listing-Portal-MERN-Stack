@@ -1,5 +1,5 @@
 import JobSeekerProfile from "../models/JobSeekerProfile.js";
-import User from "../models/user.js";
+import User from "../models/User.js";
 
 // @desc    Get current job seeker profile
 // @route   GET /api/v1/profile/jobseeker
