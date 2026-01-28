@@ -21,6 +21,21 @@ const CreateJob = () => {
         skills: ''
     });
 
+    useEffect(() => {
+        const checkProfile = async () => {
+            try {
+                // We check if the employer has a profile, otherwise backend will error on job creation
+                await api.get('/api/v1/profile/employer');
+            } catch (error) {
+                if (error.response?.status === 404) {
+                    toast.error('Please complete your company profile before posting a job');
+                    navigate('/create-employer-profile');
+                }
+            }
+        };
+        checkProfile();
+    }, [navigate]);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };

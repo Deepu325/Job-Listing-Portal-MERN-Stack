@@ -1,4 +1,4 @@
-import ProtectedRoute from "./routes/ProtectedRoute";
+import EmployerRoute from "./routes/EmployerRoute";
 import PageTransitionLayout from "./components/layout/PageTransitionLayout";
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import Login from "./components/ui/authentication/Login";
@@ -69,11 +69,11 @@ const appRouter = createBrowserRouter([ //configuration based routing(Array of r
       },
       {
         path: "/create-job",
-        element: <CreateJob />
+        element: <EmployerRoute><CreateJob /></EmployerRoute>
       },
       {
         path: "/edit-job/:id",
-        element: <EditJob />
+        element: <EmployerRoute><EditJob /></EmployerRoute>
       }
     ]
   }

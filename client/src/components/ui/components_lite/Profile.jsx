@@ -42,6 +42,7 @@ const Profile = () => {
   );
 
   const isEmployer = user?.role === "Employer";
+  const navigate = useNavigate();
 
   // Fallback if no profile data found
   if (!profile) return (
@@ -58,7 +59,7 @@ const Profile = () => {
               : "You haven't set up your profile yet. A complete profile helps employers find you and increases your chances of getting hired."}
           </p>
           <Button
-            onClick={() => window.location.href = isEmployer ? '/create-employer-profile' : '/create-profile'}
+            onClick={() => navigate(isEmployer ? '/create-employer-profile' : '/create-profile')}
             className="w-full sm:w-auto px-8 py-6 text-lg bg-green-600 hover:bg-green-700 shadow-lg shadow-green-200 rounded-xl"
           >
             Create Your Profile

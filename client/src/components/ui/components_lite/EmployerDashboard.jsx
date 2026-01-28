@@ -4,9 +4,11 @@ import { Badge } from '../badge';
 import { Button } from '../button';
 import { Plus, Users, Briefcase, ExternalLink, Loader2 } from 'lucide-react';
 import api from '../../../utils/api';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const EmployerDashboard = () => {
+    const navigate = useNavigate();
     const [jobs, setJobs] = useState([]);
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -94,7 +96,7 @@ const EmployerDashboard = () => {
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Job Management</h2>
                 <Button
-                    onClick={() => window.location.href = '/create-job'}
+                    onClick={() => navigate('/create-job')}
                     className="bg-green-700 hover:bg-green-800 shadow-lg flex items-center gap-2"
                 >
                     <Plus className="h-5 w-5" />
