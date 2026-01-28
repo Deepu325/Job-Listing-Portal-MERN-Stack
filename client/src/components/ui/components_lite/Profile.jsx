@@ -6,11 +6,12 @@ import { Badge } from "../badge";
 import AppliedJob from "./AppliedJob";
 import EmployerDashboard from "./EmployerDashboard";
 import api from "../../../utils/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +43,6 @@ const Profile = () => {
   );
 
   const isEmployer = user?.role === "Employer";
-  const navigate = useNavigate();
 
   // Fallback if no profile data found
   if (!profile) return (
@@ -95,7 +95,12 @@ const Profile = () => {
                 />
               </Avatar>
               <div className="flex-1 pb-2">
-                <h1 className="text-3xl font-bold text-gray-900">{profile.companyName || profile.fullName}</h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold text-gray-900">{profile.companyName || profile.fullName}</h1>
+                  <Badge className={isEmployer ? "bg-green-100 text-green-700 border-green-200" : "bg-blue-100 text-blue-700 border-blue-200"}>
+                    {user?.role}
+                  </Badge>
+                </div>
                 <p className="text-lg text-gray-500 font-medium mt-1">
                   {isEmployer ? profile.industry : (profile.education || "Job Seeker")}
                 </p>

@@ -22,6 +22,9 @@ const Navbar = () => {
                         <li><Link to="/">Home</Link></li>
                         <li><Link to="/browse">Browse</Link></li>
                         <li><Link to="/jobs">Jobs</Link></li>
+                        {user && user.role === 'Employer' && (
+                            <li><Link to="/create-job" className="text-green-700 font-bold hover:text-green-800 transition-colors">Post a Job</Link></li>
+                        )}
                     </ul>
                     {
                         !user ? (

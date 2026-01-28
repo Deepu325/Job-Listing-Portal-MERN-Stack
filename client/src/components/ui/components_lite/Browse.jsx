@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button } from '../button';
-import { Search, MapPin, Briefcase, Building2, Loader2, ArrowRight } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, Loader2, ArrowRight, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { JobContext } from '../../../context/JobContext';
+import { AuthContext } from '../../../context/AuthContext';
 
 const Browse = () => {
+    const { user } = useContext(AuthContext);
     const { jobs, loading, fetchJobs } = useContext(JobContext);
     const [searchTerm, setSearchTerm] = useState('');
     const [locationFilter, setLocationFilter] = useState('');
@@ -19,9 +21,18 @@ const Browse = () => {
     return (
         <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
-                <div className="mb-12 text-center md:text-left">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4 tracking-tight">Browse Opportunities</h1>
-                    <p className="text-gray-500 text-lg">Explore thousands of career paths tailored to your expertise.</p>
+                <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="text-center md:text-left">
+                        <h1 className="text-4xl font-bold text-gray-900 mb-4 tracking-tight">Browse Opportunities</h1>
+                        <p className="text-gray-500 text-lg">Explore thousands of career paths tailored to your expertise.</p>
+                    </div>
+                    {user?.role === 'Employer' && (
+                        <Link to="/create-job" className="shrink-0">
+                            <Button className="w-full md:w-auto bg-green-700 hover:bg-green-800 text-white font-bold px-8 py-4 rounded-2xl shadow-lg flex items-center gap-2 transition-transform hover:scale-105">
+                                <Plus className="h-5 w-5" /> Post a Job
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Search and Filters Bar */}

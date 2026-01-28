@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '../button';
 import { Badge } from '../badge';
 import {
@@ -10,14 +10,17 @@ import {
   Calendar,
   ArrowLeft,
   CheckCircle2,
-  Loader2
+  Loader2,
+  Pen
 } from 'lucide-react';
 import api from '../../../utils/api';
 import { toast } from 'sonner';
+import { AuthContext } from '../../../context/AuthContext';
 
 const Description = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
@@ -31,14 +34,16 @@ const Description = () => {
         const jobRes = await api.get(`/api/v1/jobs/${id}`);
         setJob(jobRes.data);
 
-        // Check application status
-        try {
-          const appRes = await api.get('/api/v1/applications/user');
-          const applications = appRes.data;
-          const alreadyApplied = applications.some(app => app.job?._id === id);
-          setHasApplied(alreadyApplied);
-        } catch (appErr) {
-          console.error("Failed to fetch applications status", appErr);
+        // Check application status if user is a job seeker
+        if (user && user.role === 'Job Seeker') {
+          try {
+            const appRes = await api.get('/api/v1/applications/user');
+            const applications = appRes.data;
+            const alreadyApplied = applications.some(app => app.job?._id === id);
+            setHasApplied(alreadyApplied);
+          } catch (appErr) {
+            console.error("Failed to fetch applications status", appErr);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch job", error);
@@ -49,9 +54,14 @@ const Description = () => {
     };
 
     if (id) fetchJobAndStatus();
-  }, [id]);
+  }, [id, user]);
 
   const handleApply = async () => {
+    if (!user) {
+      toast.error("Please login to apply");
+      navigate('/login');
+      return;
+    }
     try {
       setApplying(true);
       await api.post(`/api/v1/applications/apply/${id}`);
@@ -88,6 +98,9 @@ const Description = () => {
     );
   }
 
+  const isEmployer = user?.role === 'Employer';
+  const isOwner = user?.id === (job.postedBy?._id || job.postedBy);
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
@@ -122,13 +135,24 @@ const Description = () => {
                 </div>
               </div>
               <div className="shrink-0">
-                {hasApplied ? (
+                {isOwner ? (
+                  <Button
+                    onClick={() => navigate(`/edit-job/${id}`)}
+                    className="bg-white text-green-800 hover:bg-green-50 px-10 py-6 text-lg font-bold rounded-2xl shadow-lg flex items-center gap-2"
+                  >
+                    <Pen className="h-5 w-5" /> Edit This Job
+                  </Button>
+                ) : hasApplied ? (
                   <div className="flex flex-col items-center gap-2">
                     <Button disabled className="bg-green-500/20 text-white border border-green-400/30 cursor-not-allowed px-8 py-6 text-lg rounded-2xl backdrop-blur-md">
                       <CheckCircle2 className="mr-2 h-5 w-5" /> Already Applied
                     </Button>
-                    <p className="text-xs text-green-100 italic">Applied on {new Date(job.createdAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-green-100 italic">Position Applied</p>
                   </div>
+                ) : isEmployer ? (
+                  <Button disabled className="bg-white/10 text-white border border-white/20 px-8 py-6 text-lg font-bold rounded-2xl cursor-not-allowed">
+                    Employer View
+                  </Button>
                 ) : (
                   <Button
                     onClick={handleApply}
@@ -156,9 +180,9 @@ const Description = () => {
                   Description
                   <div className="h-1 w-10 bg-green-500 rounded-full"></div>
                 </h2>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                <div className="prose max-w-none text-gray-600 leading-relaxed whitespace-pre-line">
                   {job.description}
-                </p>
+                </div>
               </div>
 
               {job.skills && job.skills.length > 0 && (
@@ -181,7 +205,7 @@ const Description = () => {
             {/* Sidebar Info */}
             <div className="space-y-6">
               <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-4 px-2">Job Overview</h3>
+                <h3 className="font-bold text-gray-900 mb-4 px-2 text-sm uppercase tracking-wider opacity-60">Job Overview</h3>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm">
                     <div className="p-2 bg-green-100 rounded-lg text-green-700">
@@ -222,11 +246,13 @@ const Description = () => {
                 <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-200">
                   <Building2 className="h-8 w-8 text-gray-400" />
                 </div>
-                <h4 className="font-bold text-gray-900">{job.company?.name}</h4>
+                <h4 className="font-bold text-gray-900">{job.company?.name || 'ScaleUp Inc.'}</h4>
                 <p className="text-sm text-gray-500 mb-4 italic">About the company</p>
-                <Button variant="outline" className="w-full rounded-xl border-gray-200 hover:bg-gray-50 text-gray-600">
-                  View Company
-                </Button>
+                <Link to="/browse">
+                  <Button variant="outline" className="w-full rounded-xl border-gray-200 hover:bg-gray-50 text-gray-600">
+                    View More From Company
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

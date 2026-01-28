@@ -104,7 +104,7 @@ const Login = () => {
                   value="Job Seeker" // ✅ BACKEND ENUM
                   checked={input.role === "Job Seeker"}
                   onChange={changeEventHandler}
-                  className="cursor-pointer"
+                  className="cursor-pointer w-4 h-4"
                 />
                 <Label>Job Seeker</Label>
               </div>
@@ -116,7 +116,7 @@ const Login = () => {
                   value="Employer" // ✅ BACKEND ENUM
                   checked={input.role === "Employer"}
                   onChange={changeEventHandler}
-                  className="cursor-pointer"
+                  className="cursor-pointer w-4 h-4"
                 />
                 <Label>Employer</Label>
               </div>

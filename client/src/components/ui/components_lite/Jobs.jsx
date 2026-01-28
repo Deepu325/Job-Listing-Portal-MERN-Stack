@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button } from '../button';
-import { Search, MapPin, Briefcase, Building2, DollarSign, Bookmark, Loader2 } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, DollarSign, Bookmark, Loader2, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
 import { JobContext } from '../../../context/JobContext';
@@ -8,7 +8,7 @@ import { Badge } from '../badge';
 import { Card, CardContent, CardFooter } from '../card';
 
 const Jobs = () => {
-    const { isAuth } = useContext(AuthContext);
+    const { isAuth, user } = useContext(AuthContext);
     const { jobs, loading, fetchJobs } = useContext(JobContext);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -38,6 +38,16 @@ const Jobs = () => {
                     <div className="relative z-10">
                         <h1 className="text-4xl md:text-5xl font-bold mb-4">Discover Your Future</h1>
                         <p className="text-green-100 mb-8 text-lg max-w-xl">Find the best opportunities from top companies and take the next step in your career journey.</p>
+
+                        {user?.role === 'Employer' && (
+                            <div className="mb-8">
+                                <Link to="/create-job">
+                                    <Button className="bg-white text-green-700 hover:bg-green-50 px-8 py-6 text-lg rounded-2xl shadow-xl font-bold border-0 flex items-center gap-2">
+                                        <Plus className="h-5 w-5" /> Post a New Job
+                                    </Button>
+                                </Link>
+                            </div>
+                        )}
 
                         <div className="flex bg-white rounded-2xl p-2 shadow-inner-xl max-w-2xl border border-white/20 backdrop-blur-sm">
                             <div className="flex-1 relative">
