@@ -7,7 +7,7 @@ const router = express.Router();
 
 // All routes are protected and restricted to Employers
 router.use(authMiddleware);
-router.use(authorize("Employer"));
+router.use(authorize(["Employer"]));
 
 router.get("/", getEmployerProfile);
 router.post("/", createOrUpdateEmployerProfile);

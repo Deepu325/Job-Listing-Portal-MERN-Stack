@@ -7,7 +7,11 @@ import Home from "./components/ui/components_lite/Home";
 import Profile from "./components/ui/components_lite/Profile";
 import CreateProfile from "./components/ui/components_lite/CreateProfile";
 import EditProfile from "./components/ui/components_lite/EditProfile";
+import CreateEmployerProfile from "./components/ui/components_lite/CreateEmployerProfile";
+import EditEmployerProfile from "./components/ui/components_lite/EditEmployerProfile";
 import Description from "./components/ui/components_lite/Description";
+import CreateJob from "./components/ui/components_lite/CreateJob";
+import EditJob from "./components/ui/components_lite/EditJob";
 import Browse from "./components/ui/components_lite/Browse";
 import Jobs from "./components/ui/components_lite/Jobs";
 import { Toaster } from "sonner";
@@ -54,6 +58,22 @@ const appRouter = createBrowserRouter([ //configuration based routing(Array of r
       {
         path: "/edit-profile",
         element: <EditProfile />
+      },
+      {
+        path: "/create-employer-profile",
+        element: <CreateEmployerProfile />
+      },
+      {
+        path: "/edit-employer-profile",
+        element: <EditEmployerProfile />
+      },
+      {
+        path: "/create-job",
+        element: <CreateJob />
+      },
+      {
+        path: "/edit-job/:id",
+        element: <EditJob />
       }
     ]
   }

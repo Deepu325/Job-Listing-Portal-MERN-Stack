@@ -21,15 +21,27 @@ const employerProfileSchema = new mongoose.Schema({
     required: true,
     trim: true,
     match: [
-       /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
       "Please provide a valid email address",
     ],
   },
-  phone: {
+  contactPhone: {
     type: String,
     trim: true
   },
   location: {
+    type: String,
+    trim: true
+  },
+  website: {
+    type: String,
+    trim: true
+  },
+  industry: {
+    type: String,
+    trim: true
+  },
+  logo: {
     type: String,
     trim: true
   }

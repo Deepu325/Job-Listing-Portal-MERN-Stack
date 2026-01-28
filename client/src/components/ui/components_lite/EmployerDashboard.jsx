@@ -44,10 +44,24 @@ const EmployerDashboard = () => {
         }
     };
 
+    const handleDeleteJob = async (jobId) => {
+        if (!window.confirm("Are you sure you want to delete this job? This will also remove all associated applications.")) return;
+        try {
+            await api.delete(`/api/v1/jobs/${jobId}`);
+            setJobs(prev => prev.filter(job => job._id !== jobId));
+            toast.success("Job deleted successfully");
+        } catch (error) {
+            toast.error("Failed to delete job");
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-[60vh]">
-                <Loader2 className="h-10 w-10 animate-spin text-green-700" />
+                <div className="text-center">
+                    <Loader2 className="h-10 w-10 animate-spin text-green-700 mx-auto mb-4" />
+                    <p className="text-gray-500 font-medium">Loading your dashboard...</p>
+                </div>
             </div>
         );
     }
@@ -74,6 +88,18 @@ const EmployerDashboard = () => {
                         <p className="text-3xl font-bold text-gray-900">{applications.length}</p>
                     </div>
                 </div>
+            </div>
+
+            {/* Post a Job Button */}
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900">Job Management</h2>
+                <Button
+                    onClick={() => window.location.href = '/create-job'}
+                    className="bg-green-700 hover:bg-green-800 shadow-lg flex items-center gap-2"
+                >
+                    <Plus className="h-5 w-5" />
+                    Post a Job
+                </Button>
             </div>
 
             {/* Tabs */}
@@ -109,10 +135,14 @@ const EmployerDashboard = () => {
                             {jobs.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={4} className="text-center py-20">
-                                        <p className="text-gray-400 italic mb-4">You haven't posted any jobs yet.</p>
-                                        <Button className="bg-green-700 hover:bg-green-800">
-                                            <Plus className="mr-2 h-4 w-4" /> Post Your First Job
-                                        </Button>
+                                        <div className="max-w-xs mx-auto">
+                                            <p className="text-gray-400 italic mb-4">You haven't posted any jobs yet.</p>
+                                            <Link to="/create-job">
+                                                <Button className="bg-green-700 hover:bg-green-800 rounded-xl px-8">
+                                                    <Plus className="mr-2 h-4 w-4" /> Post Your First Job
+                                                </Button>
+                                            </Link>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -124,8 +154,19 @@ const EmployerDashboard = () => {
                                             <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-0">{job.jobType}</Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="ghost" className="text-green-700 hover:text-green-800 hover:bg-green-50">View</Button>
-                                            <Button variant="ghost" className="text-gray-400 hover:text-red-600 hover:bg-red-50">Delete</Button>
+                                            <Link to={`/description/${job._id}`}>
+                                                <Button variant="ghost" className="text-green-700 hover:text-green-800 hover:bg-green-50">View</Button>
+                                            </Link>
+                                            <Link to={`/edit-job/${job._id}`}>
+                                                <Button variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">Edit</Button>
+                                            </Link>
+                                            <Button
+                                                onClick={() => handleDeleteJob(job._id)}
+                                                variant="ghost"
+                                                className="text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                            >
+                                                Delete
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -155,34 +196,33 @@ const EmployerDashboard = () => {
                                     <TableRow key={app._id}>
                                         <TableCell>
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-gray-900">{app.applicant?.name}</span>
+                                                <span className="font-bold text-gray-900">{app.applicant?.name || 'Deleted User'}</span>
                                                 <span className="text-xs text-gray-500">{app.applicant?.email}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-gray-600 font-medium">{app.job?.title || 'Job Deleted'}</TableCell>
                                         <TableCell>
                                             <Badge className={`
-                        ${app.status === 'rejected' ? 'bg-red-500' :
-                                                    app.status === 'accepted' ? 'bg-green-600' :
-                                                        app.status === 'shortlisted' ? 'bg-blue-600' :
-                                                            'bg-gray-500'}
-                      `}>
+                                                ${app.status === 'rejected' ? 'bg-red-500 hover:bg-red-600' :
+                                                    app.status === 'accepted' ? 'bg-green-600 hover:bg-green-700' :
+                                                        app.status === 'shortlisted' ? 'bg-blue-600 hover:bg-blue-700' :
+                                                            'bg-gray-500 hover:bg-gray-600'}
+                                                text-white border-0 font-bold
+                                              `}>
                                                 {app.status.toUpperCase()}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <select
-                                                    className="bg-gray-50 border border-gray-200 rounded-lg text-sm px-2 py-1 outline-none"
-                                                    value={app.status}
-                                                    onChange={(e) => handleStatusUpdate(app._id, e.target.value)}
-                                                >
-                                                    <option value="pending">Pending</option>
-                                                    <option value="shortlisted">Shortlist</option>
-                                                    <option value="accepted">Accept</option>
-                                                    <option value="rejected">Reject</option>
-                                                </select>
-                                            </div>
+                                            <select
+                                                className="bg-gray-50 border border-gray-200 rounded-lg text-sm px-3 py-1.5 outline-none focus:ring-2 focus:ring-green-500 transition-all font-medium"
+                                                value={app.status}
+                                                onChange={(e) => handleStatusUpdate(app._id, e.target.value)}
+                                            >
+                                                <option value="pending">Pending</option>
+                                                <option value="shortlisted">Shortlist</option>
+                                                <option value="accepted">Accept</option>
+                                                <option value="rejected">Reject</option>
+                                            </select>
                                         </TableCell>
                                     </TableRow>
                                 ))

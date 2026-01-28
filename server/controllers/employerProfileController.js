@@ -1,16 +1,11 @@
 import EmployerProfile from "../models/EmployerProfile.js";
+import Job from "../models/Job.js";
 
 // @desc    Get current employer profile
 // @route   GET /api/v1/profile/employer
 // @access  Private (Employer only)
 export const getEmployerProfile = async (req, res) => {
     try {
-        // Role check (Double check, though middleware should handle generalized auth, we need specific role check)
-        // Assuming authMiddleware adds req.user = { userId, role }
-        if (req.user.role !== "Employer") {
-            return res.status(403).json({ message: "Access denied. Employers only." });
-        }
-
         const profile = await EmployerProfile.findOne({ userId: req.user.userId }).populate("userId", "name email");
 
         if (!profile) {
@@ -28,19 +23,28 @@ export const getEmployerProfile = async (req, res) => {
 // @route   POST /api/v1/profile/employer
 // @access  Private (Employer only)
 export const createOrUpdateEmployerProfile = async (req, res) => {
-    const { companyName, description, location, website } = req.body;
-
-    if (req.user.role !== "Employer") {
-        return res.status(403).json({ message: "Access denied. Employers only." });
-    }
+    const {
+        companyName,
+        companyDescription,
+        companyEmail,
+        contactPhone,
+        location,
+        website,
+        industry,
+        logo
+    } = req.body;
 
     // Build profile object
     const profileFields = {
         userId: req.user.userId,
         companyName,
-        description,
+        companyDescription,
+        companyEmail,
+        contactPhone,
         location,
-        website
+        website,
+        industry,
+        logo
     };
 
     try {
@@ -53,6 +57,18 @@ export const createOrUpdateEmployerProfile = async (req, res) => {
                 { $set: profileFields },
                 { new: true }
             );
+
+            // Update all jobs posted by this employer with new company info
+            await Job.updateMany(
+                { postedBy: req.user.userId },
+                {
+                    $set: {
+                        "company.name": companyName,
+                        "company.logo": logo
+                    }
+                }
+            );
+
             return res.status(200).json(profile);
         }
 

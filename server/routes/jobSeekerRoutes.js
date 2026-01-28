@@ -7,7 +7,7 @@ const router = express.Router();
 
 // All routes are protected and restricted to Job Seekers
 router.use(authMiddleware);
-router.use(authorize("Job Seeker"));
+router.use(authorize(["Job Seeker"]));
 
 router.get("/", getJobSeekerProfile);
 router.post("/", createOrUpdateJobSeekerProfile);
